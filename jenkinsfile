@@ -1,53 +1,38 @@
-pipeline { 
+pipeline {
+    agent any
 
- agent any 
+    tools {
+        maven 'maven' // Make sure 'Maven' matches the tool name configured in Jenkins
+    }
 
- tools { 
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    bat "mvn clean package"
+                }
+            }
+            post {
+                success {
+                    echo "Archiving the Artifacts"
+                    archiveArtifacts artifacts: '**/target/*.war'
+                }
+            }
+        }
 
- maven 'Maven' 
-
- } 
-
- stages { 
-
- stage('Build') { 
-
- steps { 
-
- script { 
-
- bat "mvn clean package" 
-
- } 
-
- } 
-
- post { 
-
- success { 
-
- echo "Archiving the Artifacts" 
-
- archiveArtifacts artifacts: '**/target/*.war' 
-
- } 
-
- } 
-
- } 
-
- stage('Deploy to Tomcat') { 
-
- steps { 
-
- script { 
-
-deploy adapters: [tomcat9(credentialsId: 'c138103b-1906-44a5-8998-9b548aeeef6a', path: '', url: 'http://localhost:8080')], contextPath: '/ci-cd-jk', war: '**/*.war' } 
-
- } 
-
- } 
-
-} 
+        stage('Deploy to Tomcat') {
+            steps {
+                script {
+                    deploy adapters: [tomcat9(credentialsId: 'c138103b-1906-44a5-8998-9b548aeeef6a', 
+                                             path: '', 
+                                             url: 'http://localhost:8080')],
+                           contextPath: '/ci-cd-jk', 
+                           war: '**/*.war'
+                }
+            }
+        }
+    }
+}
+ 
 
  
